@@ -55,4 +55,36 @@ BEGIN
 END
 
 --call
+
 EXEC CompleteAppointment 15,30000
+
+
+--Function تستخدم للحسابات المتكررة بدون تعديل بيانات.
+
+--حساب عمر المريض
+CREATE FUNCTION dbo.CalcPatientAge(@BirthDate Date)
+Returns INT
+AS
+BEGIN
+	Return DATEDIFF(YEAR,@BirthDate, GETDATE())
+END
+
+--use 
+--function used inside query statement
+SELECT name, dbo.CalcPatientAge(birth_date) AS Age
+FROM Patients
+
+--حساب عدد مواعيد الطبيب (Scalar Function)
+--لان اللي راجع قيمة واحده 
+CREATE FUNCTION dbo.DoctorAppointmentCount(@DoctorId INT)
+RETURNS INT
+AS
+BEGIN
+	DECLARE @Count INT
+	SELECT @Count=Count(*) FROM Apointments WHERE doctor_id=@DoctorId
+	RETURN @Count
+END
+--use
+SELECT name,
+       dbo.DoctorAppointmentCount(doctor_id) AS TotalAppointments
+FROM Doctors;
